@@ -4,3 +4,4 @@ namespace: kubetask
 resources:
   - servicemonitor-backend.yaml
   - prometheusrule-kubetask.yaml
+  - grafana-dashboard-configmap.yaml
