@@ -1,0 +1,9 @@
+namespace: kubetask
+
+frontend:
+  image: ghcr.io/your-org/kubetask-frontend:0.1.0
+  replicas: 2
+
+backend:
+  image: ghcr.io/your-org/kubetask-backend:0.1.0
+  replicas: 2

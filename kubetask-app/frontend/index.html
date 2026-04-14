@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KubeTask</title>
+    <style>
+      :root {
+        --bg: #f3f7f0;
+        --paper: #ffffff;
+        --text: #1f2933;
+        --accent: #1a7f5a;
+        --accent-soft: #d7f1e6;
+        --danger: #b42318;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Avenir Next", "Segoe UI", sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at top left, #eaf7ef 0%, var(--bg) 40%, #dde9e0 100%);
+      }
+
+      main {
+        max-width: 860px;
+        margin: 32px auto;
+        padding: 24px;
+        background: var(--paper);
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(20, 44, 34, 0.12);
+      }
+
+      h1 {
+        margin-top: 0;
+      }
+
+      form {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: 1fr 1fr auto;
+      }
+
+      input,
+      button {
+        border: 1px solid #d0d9d5;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 15px;
+      }
+
+      button {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      li {
+        margin: 8px 0;
+        padding: 12px;
+        border-radius: 10px;
+        background: var(--accent-soft);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .done {
+        text-decoration: line-through;
+        opacity: 0.75;
+      }
+
+      .error {
+        color: var(--danger);
+      }
+
+      @media (max-width: 720px) {
+        form {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>KubeTask</h1>
+      <p>Production-style task board running on Kubernetes and managed with ArgoCD.</p>
+
+      <form id="task-form">
+        <input id="title" type="text" placeholder="Task title" required />
+        <input id="assignee" type="text" placeholder="Assignee" />
+        <button type="submit">Create</button>
+      </form>
+
+      <p class="error" id="error"></p>
+      <ul id="task-list"></ul>
+    </main>
+
+    <script>
+      const API_BASE = window.KUBETASK_API_BASE || "/api";
+      const taskList = document.getElementById("task-list");
+      const taskForm = document.getElementById("task-form");
+      const errorEl = document.getElementById("error");
+
+      async function loadTasks() {
+        errorEl.textContent = "";
+        const res = await fetch(`${API_BASE}/tasks`);
+        if (!res.ok) {
+          errorEl.textContent = "Failed to load tasks.";
+          return;
+        }
+
+        const payload = await res.json();
+        renderTasks(payload.items || []);
+      }
+
+      function renderTasks(tasks) {
+        taskList.innerHTML = "";
+        tasks.forEach((task) => {
+          const li = document.createElement("li");
+          const title = document.createElement("span");
+          title.textContent = `${task.title} (${task.assignee || "unassigned"})`;
+          if (task.completed) title.classList.add("done");
+
+          const completeButton = document.createElement("button");
+          completeButton.textContent = "Complete";
+          completeButton.disabled = task.completed;
+          completeButton.addEventListener("click", async () => {
+            await fetch(`${API_BASE}/tasks/${task.id}/complete`, { method: "PATCH" });
+            await loadTasks();
+          });
+
+          li.appendChild(title);
+          li.appendChild(completeButton);
+          taskList.appendChild(li);
+        });
+      }
+
+      taskForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        errorEl.textContent = "";
+
+        const title = document.getElementById("title").value;
+        const assignee = document.getElementById("assignee").value;
+
+        const res = await fetch(`${API_BASE}/tasks`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, assignee })
+        });
+
+        if (!res.ok) {
+          errorEl.textContent = "Failed to create task.";
+          return;
+        }
+
+        taskForm.reset();
+        await loadTasks();
+      });
+
+      loadTasks();
+    </script>
+  </body>
+</html>
