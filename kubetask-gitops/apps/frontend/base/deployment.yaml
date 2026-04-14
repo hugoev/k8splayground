@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/your-org/kubetask-frontend:0.1.0
+          image: ghcr.io/hugoev/kubetask-frontend:0.1.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

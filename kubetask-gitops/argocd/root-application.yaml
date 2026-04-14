@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/kubetask-gitops.git
+    repoURL: https://github.com/hugoev/k8splayground.git
     targetRevision: main
-    path: argocd/apps
+    path: kubetask-gitops/argocd/apps
     directory:
       recurse: true
   destination:

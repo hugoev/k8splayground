@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/kubetask-gitops.git
+    repoURL: https://github.com/hugoev/k8splayground.git
     targetRevision: main
-    path: apps/backend/base
+    path: kubetask-gitops/apps/backend/base
   destination:
     server: https://kubernetes.default.svc
     namespace: kubetask
